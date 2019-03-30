@@ -1,0 +1,24 @@
+import pandas as pd
+
+url = 'https://physionet.org/physiobank/database/bidmc/bidmc_csv/bidmc_01_Fix.txt'
+
+df = pd.read_csv(url, header=None, names = ['text'])
+attr = []
+val = []
+for index, row in df.iterrows():
+    attr.append(row['text'].split(":", 1)[0])
+    if (index!=0):
+        val.append(row['text'].split(":", 1)[1])
+    
+    
+df1 = pd.DataFrame({'attr':attr})
+df2 = pd.DataFrame({'val':val})
+frames = (df1,df2)
+df1.reset_index(drop=True, inplace=True)
+df2.reset_index(drop=True, inplace=True)
+
+result = pd.concat(frames, axis = 1)
+result.at[0, 'attr'] = result.at[0, 'attr'] + " " + result.at[1, 'attr']
+result.attr= result.attr.shift(-1)
+result.replace(["NaN"], np.nan, inplace = True)
+result = result.dropna()
